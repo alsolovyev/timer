@@ -7,6 +7,7 @@ import (
 	"timer/internal/args"
 	"timer/internal/cursor"
 	"timer/internal/render"
+	"timer/internal/ticker"
 )
 
 func main() {
@@ -19,10 +20,14 @@ func main() {
 	w := os.Stdout
 	c := cursor.New(w)
 	r := render.New(w, c)
+	t := ticker.New(a.Duration)
 
 	c.Hide()
 
-	r.RenderLine(a)
+	t.Start(func(t *ticker.Tick) {
+		r.ClearScreen()
+		r.RenderLine(a)
+	}, nil)
 
 	c.Show()
 }
