@@ -1,7 +1,8 @@
 package args
 
 import (
-	"os"
+	"flag"
+	"fmt"
 	"time"
 )
 
@@ -10,7 +11,14 @@ type Args struct {
 }
 
 func Parse() (*Args, error) {
-	d, err := time.ParseDuration(os.Args[1])
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) == 0 {
+		return nil, fmt.Errorf("First argument (time duration) is required")
+	}
+
+	d, err := time.ParseDuration(args[0])
 	if err != nil {
 		return nil, err
 	}

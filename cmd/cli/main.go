@@ -24,8 +24,7 @@ const (
 func main() {
 	a, err := args.Parse()
 	if err != nil {
-		log.Panic("Error parins args")
-		return
+		log.Fatal(err)
 	}
 
 	w := os.Stdout
