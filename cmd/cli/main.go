@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"timer/internal/args"
 	"timer/internal/cursor"
+	"timer/internal/render"
 )
 
 func main() {
@@ -18,8 +18,11 @@ func main() {
 
 	w := os.Stdout
 	c := cursor.New(w)
+	r := render.New(w, c)
 
 	c.Hide()
-	fmt.Println(a)
+
+	r.RenderLine(a)
+
 	c.Show()
 }
