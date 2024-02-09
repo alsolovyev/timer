@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"timer/internal/args"
+	"timer/internal/cursor"
 )
 
 func main() {
@@ -14,5 +16,10 @@ func main() {
 		return
 	}
 
+	w := os.Stdout
+	c := cursor.New(w)
+
+	c.Hide()
 	fmt.Println(a)
+	c.Show()
 }
