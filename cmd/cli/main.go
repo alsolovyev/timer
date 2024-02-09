@@ -1,7 +1,18 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+
+	"timer/internal/args"
+)
 
 func main() {
-	fmt.Println("timer")
+	a, err := args.Parse()
+	if err != nil {
+		log.Panic("Error parins args")
+		return
+	}
+
+	fmt.Println(a)
 }
