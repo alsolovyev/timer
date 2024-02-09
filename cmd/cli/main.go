@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"timer/internal/args"
 	"timer/internal/cursor"
+	"timer/internal/info"
 	"timer/internal/progress"
 	"timer/internal/render"
 	"timer/internal/ticker"
@@ -32,12 +34,14 @@ func main() {
 	t := ticker.New(a.Duration)
 
 	p := progress.New(EMPTY_SYMBOL, FULL_SYMBOL, GRADIENT_BEGIN, GRADIENT_END, EMPTY_COLOR)
+	i := info.New(time.Now(), a.Duration)
 
 	c.Hide()
 
 	t.Start(func(t *ticker.Tick) {
 		r.ClearScreen()
-		r.RenderLineln(p.GetView(t.Percents))
+		r.RenderLineln(i.GetView())
+		r.RenderLine(p.GetView(t.Percents))
 	}, nil)
 
 	c.Show()
