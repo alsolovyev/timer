@@ -8,9 +8,12 @@ import (
 
 type Args struct {
 	Duration time.Duration
+	Name     string
 }
 
 func Parse() (*Args, error) {
+	n := flag.String("n", "", "The name of the timer")
+
 	flag.Parse()
 
 	args := flag.Args()
@@ -23,5 +26,8 @@ func Parse() (*Args, error) {
 		return nil, err
 	}
 
-	return &Args{Duration: d}, nil
+	return &Args{
+		Duration: d,
+		Name:     *n,
+	}, nil
 }

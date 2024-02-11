@@ -10,17 +10,47 @@ const (
 )
 
 type Info struct {
-	StartTime string
 	EndTime   time.Time
+	Prefix    string
+	StartTime time.Time
 }
 
-func New(s time.Time, d time.Duration) *Info {
-	i := Info{}
+type InfoOption func(*Info)
 
-	i.StartTime = s.Format(TIME_FORMAT)
-	i.EndTime = s.Add(d)
+func New(d time.Duration, opts ...InfoOption) *Info {
+	n := time.Now()
 
-	return &i
+	i := &Info{
+		Prefix:    "",
+		StartTime: n,
+		EndTime:   n.Add(d),
+	}
+
+	for _, opt := range opts {
+		opt(i)
+	}
+
+	return i
+}
+
+func (i *Info) GetView() string {
+	return i.Prefix + i.GetRemainTime()
+}
+
+func WithName(n string) InfoOption {
+	return func(i *Info) {
+		if n == "" {
+			return
+		}
+
+		i.Prefix += n + " "
+	}
+}
+
+func WithStartTime() InfoOption {
+	return func(i *Info) {
+		i.Prefix += time.Now().Format(TIME_FORMAT) + " "
+	}
 }
 
 func (i *Info) GetRemainTime() string {
@@ -50,8 +80,4 @@ func (i *Info) GetRemainTime() string {
 	}
 
 	return fmt.Sprintf("%dms", ms)
-}
-
-func (i *Info) GetView() string {
-	return i.StartTime + ": " + i.GetRemainTime()
 }

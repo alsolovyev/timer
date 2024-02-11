@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
 	"timer/internal/args"
 	"timer/internal/cursor"
@@ -33,7 +32,7 @@ func main() {
 	t := ticker.New(a.Duration)
 
 	p := progress.New(EMPTY_SYMBOL, FULL_SYMBOL, GRADIENT_BEGIN, GRADIENT_END, EMPTY_COLOR)
-	i := info.New(time.Now(), a.Duration)
+	i := info.New(a.Duration, info.WithStartTime(), info.WithName(a.Name))
 
 	c.Hide()
 
