@@ -2,10 +2,11 @@ package progress
 
 import (
 	"strings"
+
 	"timer/internal/terminal"
+	"timer/internal/termstyle"
 
 	"github.com/lucasb-eyer/go-colorful"
-	"github.com/muesli/termenv"
 )
 
 const (
@@ -15,11 +16,9 @@ const (
 type Progress struct {
 	WinWidth int
 
-	ColorProfile termenv.Profile
-
 	ColorA colorful.Color
 	ColorB colorful.Color
-	ColorC termenv.Color
+	ColorC string
 
 	EmptySymbol string
 	FullSymbol  string
@@ -32,12 +31,10 @@ func New(e, f, ca, cb, cc string) *Progress {
 	p := Progress{}
 
 	p.WinWidth = p.GetWidth()
-	p.ColorProfile = termenv.ColorProfile()
 
-	// TODO: Catch errors
 	p.ColorA, _ = colorful.Hex(ca)
 	p.ColorB, _ = colorful.Hex(cb)
-	p.ColorC = p.ColorProfile.Color(cc)
+	p.ColorC = cc
 
 	p.EmptySymbol = e
 	p.FullSymbol = f
@@ -65,10 +62,9 @@ func (p *Progress) GetBar(n int, g bool, s string) string {
 	for i := 0; i < n; i++ {
 		if g {
 			cg := p.ColorA.BlendLuv(p.ColorB, float64(i)/float64(p.WinWidth-1)).Hex()
-			c := p.ColorProfile.Color(cg)
-			r.WriteString(termenv.String(s).Foreground(c).String())
+			r.WriteString(termstyle.ToColor(s, cg))
 		} else {
-			r.WriteString(termenv.String(s).Foreground(p.ColorC).String())
+			r.WriteString(termstyle.ToColor(s, p.ColorC))
 		}
 	}
 

@@ -3,8 +3,7 @@ package info
 import (
 	"fmt"
 	"time"
-
-	"github.com/muesli/termenv"
+	"timer/internal/termstyle"
 )
 
 const (
@@ -39,7 +38,7 @@ func New(d time.Duration, opts ...InfoOption) *Info {
 
 func (i *Info) GetView() string {
 	if i.WithCountdown {
-		return i.Prefix + i.GetRemainTime()
+		return i.Prefix + termstyle.ToSecondary(i.GetRemainTime())
 	}
 
 	return i.Prefix
@@ -51,13 +50,13 @@ func WithName(n string) InfoOption {
 			return
 		}
 
-		i.Prefix += termenv.String(n).Bold().String() + " "
+		i.Prefix += termstyle.ToPrimaryBold(n) + " "
 	}
 }
 
 func WithStartTime() InfoOption {
 	return func(i *Info) {
-		i.Prefix += time.Now().Format(TIME_FORMAT) + " "
+		i.Prefix += termstyle.ToSecondary(time.Now().Format(TIME_FORMAT)) + " "
 	}
 }
 
