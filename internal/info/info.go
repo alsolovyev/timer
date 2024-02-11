@@ -3,6 +3,8 @@ package info
 import (
 	"fmt"
 	"time"
+
+	"github.com/muesli/termenv"
 )
 
 const (
@@ -43,7 +45,7 @@ func WithName(n string) InfoOption {
 			return
 		}
 
-		i.Prefix += n + " "
+		i.Prefix += termenv.String(n).Bold().String() + " "
 	}
 }
 
