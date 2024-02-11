@@ -1,7 +1,6 @@
 package info
 
 import (
-	"fmt"
 	"time"
 	"timer/internal/termstyle"
 )
@@ -70,27 +69,9 @@ func (i *Info) GetRemainTime() string {
 	c := time.Now()
 	r := i.EndTime.Sub(c)
 
-	h := int(r.Hours())
-	m := int(r.Minutes()) % 60
-	s := int(r.Seconds()) % 60
-	ms := (r.Milliseconds() + 50) / 100 * 100 // rounding to the nearest hundred
-
-	if r.Hours() >= 24 {
-		d := int(r.Hours() / 24)
-		return fmt.Sprintf("%dd%dh%dm%ds", d, h, m, s)
+	if r <= time.Second {
+		return r.Round(100 * time.Millisecond).String()
 	}
 
-	if h > 0 {
-		return fmt.Sprintf("%dh%dm%ds", h, m, s)
-	}
-
-	if m > 0 {
-		return fmt.Sprintf("%dm%ds", m, s)
-	}
-
-	if s > 0 {
-		return fmt.Sprintf("%ds", s)
-	}
-
-	return fmt.Sprintf("%dms", ms)
+	return r.Round(time.Second).String()
 }
