@@ -32,7 +32,11 @@ func main() {
 	t := ticker.New(a.Duration)
 
 	p := progress.New(EMPTY_SYMBOL, FULL_SYMBOL, GRADIENT_BEGIN, GRADIENT_END, EMPTY_COLOR)
-	i := info.New(a.Duration, info.WithStartTime(), info.WithName(a.Name))
+	i := info.New(a.Duration,
+    info.WithName(a.Name),
+    info.WithStartTime(),
+    info.WithCountdown(),
+  )
 
 	c.Hide()
 

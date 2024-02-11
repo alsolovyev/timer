@@ -15,6 +15,8 @@ type Info struct {
 	EndTime   time.Time
 	Prefix    string
 	StartTime time.Time
+
+	WithCountdown bool
 }
 
 type InfoOption func(*Info)
@@ -36,7 +38,11 @@ func New(d time.Duration, opts ...InfoOption) *Info {
 }
 
 func (i *Info) GetView() string {
-	return i.Prefix + i.GetRemainTime()
+	if i.WithCountdown {
+		return i.Prefix + i.GetRemainTime()
+	}
+
+	return i.Prefix
 }
 
 func WithName(n string) InfoOption {
@@ -52,6 +58,12 @@ func WithName(n string) InfoOption {
 func WithStartTime() InfoOption {
 	return func(i *Info) {
 		i.Prefix += time.Now().Format(TIME_FORMAT) + " "
+	}
+}
+
+func WithCountdown() InfoOption {
+	return func(i *Info) {
+		i.WithCountdown = true
 	}
 }
 
