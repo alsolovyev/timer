@@ -22,22 +22,22 @@ type Tick struct {
 }
 
 type Ticker struct {
-	i time.Duration
-	d time.Time
-	s chan struct{}
+	Duration time.Duration
+	EndTime  time.Time
+	s        chan struct{}
 }
 
 // New creates a new Ticker with the specified interval (in seconds) and durection (in seconds)
 func New(d time.Duration) *Ticker {
 	return &Ticker{
-		i: DEFAULT_INTERVAL,
-		d: time.Now().Add(d),
-		s: make(chan struct{}),
+		Duration: DEFAULT_INTERVAL,
+		EndTime:  time.Now().Add(d),
+		s:        make(chan struct{}),
 	}
 }
 
 func (t *Ticker) Start(tick func(*Tick), s chan os.Signal) {
-	tkr := time.NewTicker(t.i)
+	tkr := time.NewTicker(t.Duration)
 	tt, ct, n := t.startTickInfo()
 
 	if s == nil {
@@ -54,7 +54,7 @@ func (t *Ticker) Start(tick func(*Tick), s chan os.Signal) {
 			tick(t.getTick(tt, ct, n))
 			ct++
 
-			if time.Now().After(t.d) {
+			if time.Now().After(t.EndTime) {
 				tkr.Stop()
 				return
 			}
@@ -75,7 +75,7 @@ func (t *Ticker) Stop() {
 
 func (t *Ticker) startTickInfo() (int, int, time.Time) {
 	n := time.Now()
-	tc := int(t.d.Sub(n)/t.i + 1)
+	tc := int(t.EndTime.Sub(n)/t.Duration + 1)
 
 	return tc, 0, n
 }
