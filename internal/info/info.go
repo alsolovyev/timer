@@ -1,6 +1,7 @@
 package info
 
 import (
+	"fmt"
 	"time"
 	"timer/internal/termstyle"
 )
@@ -47,11 +48,14 @@ func (i *Info) GetEndView(e bool) string {
 	if e {
 		return fmt.Sprintf("%s %s",
 			termstyle.ToBold("Stopped"),
-			termstyle.ToSecondary("Total time elapsed: " + i.GetElapsedTime()),
+			termstyle.ToSecondary("Total time elapsed: "+i.GetElapsedTime()),
 		)
 	}
 
-	return ""
+	return fmt.Sprintf("%s %s",
+		termstyle.ToBold("Done"),
+		termstyle.ToSecondary(time.Now().Format(TIME_FORMAT)),
+	)
 }
 
 func WithName(n string) InfoOption {

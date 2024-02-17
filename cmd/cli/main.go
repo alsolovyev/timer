@@ -62,7 +62,7 @@ func main() {
 		cancel()
 
 	case <-t.StopChan:
-		r.RenderLineln("Timer completed!")
+		r.RenderLineln(i.GetEndView(false))
 		cancel()
 	}
 }
