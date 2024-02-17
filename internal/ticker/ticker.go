@@ -1,9 +1,7 @@
 package ticker
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
+	"context"
 	"time"
 )
 
@@ -24,53 +22,51 @@ type Tick struct {
 type Ticker struct {
 	Duration time.Duration
 	EndTime  time.Time
-	s        chan struct{}
+
+	StopChan chan struct{}
+	Ticker   *time.Ticker
+
+	ctx context.Context
 }
 
 // New creates a new Ticker with the specified interval (in seconds) and durection (in seconds)
-func New(d time.Duration) *Ticker {
+func New(ctx context.Context, d time.Duration) *Ticker {
 	return &Ticker{
 		Duration: DEFAULT_INTERVAL,
 		EndTime:  time.Now().Add(d),
-		s:        make(chan struct{}),
+		StopChan: make(chan struct{}),
+
+		ctx: ctx,
 	}
 }
 
-func (t *Ticker) Start(tick func(*Tick), s chan os.Signal) {
-	tkr := time.NewTicker(t.Duration)
-	tt, ct, n := t.startTickInfo()
+func (t *Ticker) Start(tick func(*Tick)) {
+	t.Ticker = time.NewTicker(t.Duration)
+  defer t.Stop()
 
-	if s == nil {
-		s = make(chan os.Signal, 1)
-		signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)
-	}
+	tc, ct, n := t.startTickInfo()
 
-	tick(t.getTick(tt, ct, n))
+	tick(t.getTick(tc, ct, n))
 	ct++
 
-	for {
+  for {
 		select {
-		case <-tkr.C:
-			tick(t.getTick(tt, ct, n))
+		case <-t.Ticker.C:
+			tick(t.getTick(tc, ct, n))
 			ct++
 
 			if time.Now().After(t.EndTime) {
-				tkr.Stop()
 				return
 			}
-		case <-t.s:
-			tkr.Stop()
-			return
-
-		case <-s:
-			tkr.Stop()
+		case <-t.ctx.Done():
 			return
 		}
 	}
 }
 
 func (t *Ticker) Stop() {
-	close(t.s)
+  t.Ticker.Stop()
+  close(t.StopChan)
 }
 
 func (t *Ticker) startTickInfo() (int, int, time.Time) {

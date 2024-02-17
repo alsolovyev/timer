@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"timer/internal/args"
 	"timer/internal/cursor"
@@ -26,25 +29,40 @@ func main() {
 		log.Fatal(err)
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	s := make(chan os.Signal, 1)
+	signal.Notify(s, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
 	w := os.Stdout
 	c := cursor.New(w)
 	r := render.New(w, c)
-	t := ticker.New(a.Duration)
+	t := ticker.New(ctx, a.Duration)
 
 	p := progress.New(EMPTY_SYMBOL, FULL_SYMBOL, GRADIENT_BEGIN, GRADIENT_END, EMPTY_COLOR)
 	i := info.New(a.Duration,
-    info.WithName(a.Name),
-    info.WithStartTime(),
-    info.WithCountdown(),
-  )
+		info.WithName(a.Name),
+		info.WithStartTime(),
+		info.WithCountdown(),
+	)
 
 	c.Hide()
 
-	t.Start(func(t *ticker.Tick) {
+	go t.Start(func(t *ticker.Tick) {
 		r.ClearScreen()
 		r.RenderLineln(i.GetView())
 		r.RenderLine(p.GetView(t.Percents))
-	}, nil)
+	})
 
 	c.Show()
+
+	select {
+	case <-s:
+		r.ClearLine()
+		r.RenderLineln("Timer stopped by user")
+		cancel()
+
+	case <-t.StopChan:
+		r.RenderLineln("Timer completed!")
+		cancel()
+	}
 }
