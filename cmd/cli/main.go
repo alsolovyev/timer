@@ -58,7 +58,7 @@ func main() {
 	select {
 	case <-s:
 		r.ClearLine()
-		r.RenderLineln("Timer stopped by user")
+		r.RenderLineln(i.GetEndView(true))
 		cancel()
 
 	case <-t.StopChan:

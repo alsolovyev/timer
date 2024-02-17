@@ -43,6 +43,17 @@ func (i *Info) GetView() string {
 	return i.Prefix
 }
 
+func (i *Info) GetEndView(e bool) string {
+	if e {
+		return fmt.Sprintf("%s %s",
+			termstyle.ToBold("Stopped"),
+			termstyle.ToSecondary("Total time elapsed: " + i.GetElapsedTime()),
+		)
+	}
+
+	return ""
+}
+
 func WithName(n string) InfoOption {
 	return func(i *Info) {
 		if n == "" {
@@ -74,4 +85,8 @@ func (i *Info) GetRemainTime() string {
 	}
 
 	return r.Round(time.Second).String()
+}
+
+func (i *Info) GetElapsedTime() string {
+	return time.Since(i.StartTime).Round(time.Second).String()
 }
