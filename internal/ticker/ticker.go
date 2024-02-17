@@ -42,22 +42,17 @@ func New(ctx context.Context, d time.Duration) *Ticker {
 
 func (t *Ticker) Start(tick func(*Tick)) {
 	t.Ticker = time.NewTicker(t.Duration)
-  defer t.Stop()
+	defer t.Stop()
 
-	tc, ct, n := t.startTickInfo()
+	tc, n := t.startTickInfo()
 
-	tick(t.getTick(tc, ct, n))
-	ct++
+	tick(t.getTick(tc, 0, n))
 
-  for {
+	for c := 1; c <= tc; c++ {
 		select {
 		case <-t.Ticker.C:
-			tick(t.getTick(tc, ct, n))
-			ct++
+			tick(t.getTick(tc, c, n))
 
-			if time.Now().After(t.EndTime) {
-				return
-			}
 		case <-t.ctx.Done():
 			return
 		}
@@ -65,15 +60,15 @@ func (t *Ticker) Start(tick func(*Tick)) {
 }
 
 func (t *Ticker) Stop() {
-  t.Ticker.Stop()
-  close(t.StopChan)
+	t.Ticker.Stop()
+	close(t.StopChan)
 }
 
-func (t *Ticker) startTickInfo() (int, int, time.Time) {
+func (t *Ticker) startTickInfo() (int, time.Time) {
 	n := time.Now()
 	tc := int(t.EndTime.Sub(n)/t.Duration + 1)
 
-	return tc, 0, n
+	return tc, n
 }
 
 func (t *Ticker) getTick(tc int, c int, s time.Time) *Tick {
