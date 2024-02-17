@@ -43,16 +43,17 @@ func (r *Render) RenderLineln(a ...any) {
   r.Lines++
 }
 
-func (r *Render) ClearLine() {
-  r.Cursor.Up(1)
-  r.Cursor.StartOfLine()
-  r.Cursor.ClearLine()
-  r.Lines--
+// DeleteLine clears the current line, moves the cursor up one line.
+func (r *Render) DeleteLine() {
+	r.Cursor.Up(1)
+	r.Cursor.StartOfLine()
+	r.Cursor.ClearLine()
+	r.Lines--
 }
 
+// ClearScreen clears the entire screen.
 func (r *Render) ClearScreen() {
 	for r.Lines > 0 {
-    r.ClearLine()
+		r.DeleteLine()
 	}
 }
-
