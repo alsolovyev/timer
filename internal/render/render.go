@@ -43,6 +43,12 @@ func (r *Render) RenderLineln(a ...any) {
   r.Lines++
 }
 
+// ClearLine clears the content of the current line by moving the cursor to the beginning.
+func (r *Render) ClearLine() {
+	r.Cursor.StartOfLine()
+	r.Cursor.ClearLine()
+}
+
 // DeleteLine clears the current line, moves the cursor up one line.
 func (r *Render) DeleteLine() {
 	r.Cursor.Up(1)
