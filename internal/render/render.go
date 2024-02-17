@@ -5,9 +5,9 @@ import (
 	"io"
 )
 
-var (
-  TEXT_BOLD = "\033[1m"
-  TEXT_RESET = "\033[0m"
+const (
+	TEXT_BOLD  = "\033[1m"
+	TEXT_RESET = "\033[0m"
 )
 
 type Cursor interface {
@@ -39,8 +39,7 @@ func (r *Render) RenderLine(a ...any) {
 
 func (r *Render) RenderLineln(a ...any) {
 	fmt.Fprintln(r.Writer, a...)
-
-  r.Lines++
+	r.Lines++
 }
 
 // ClearLine clears the content of the current line by moving the cursor to the beginning.
