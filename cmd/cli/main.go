@@ -52,6 +52,7 @@ func main() {
 	)
 
 	c.Hide()
+	defer c.Show()
 
 	go t.Start(func(t *ticker.Tick) {
 		r.ClearScreen()
@@ -59,16 +60,15 @@ func main() {
 		r.RenderLine(p.GetView(t.Percents))
 	})
 
-	c.Show()
-
+	var x bool
 	select {
-	case <-s:
+	case <-s: // Stop signal received
+		x = true
 		r.ClearLine()
-		r.RenderLineln(i.GetEndView(true))
-		cancel()
-
-	case <-t.StopChan:
-		r.RenderLineln(i.GetEndView(false))
-		cancel()
+	case <-t.StopChan: // Timer completed
+		x = false
 	}
+
+	cancel()
+	r.RenderLineln(i.GetEndView(x))
 }
