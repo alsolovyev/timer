@@ -69,6 +69,10 @@ func main() {
 		x = false
 	}
 
+	if a.ClearOnComplete {
+		r.ClearScreen()
+	}
+
 	cancel()
 	r.RenderLineln(i.GetEndView(x))
 }

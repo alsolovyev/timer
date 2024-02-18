@@ -7,14 +7,16 @@ import (
 )
 
 type Args struct {
-	Duration      time.Duration
-	Name          string
-	ShowBuildInfo bool
+	ClearOnComplete bool
+	Duration        time.Duration
+	Name            string
+	ShowBuildInfo   bool
 }
 
 func Parse() (*Args, error) {
 	n := flag.String("n", "", "The name of the timer")
 	v := flag.Bool("v", false, "Display the app version")
+	c := flag.Bool("clearOnComplete", false, "Clear update info on timer completion")
 
 	flag.Parse()
 
@@ -24,9 +26,10 @@ func Parse() (*Args, error) {
 	}
 
 	return &Args{
-		Duration:      d,
-		Name:          *n,
-		ShowBuildInfo: *v,
+		ClearOnComplete: *c,
+		Duration:        d,
+		Name:            *n,
+		ShowBuildInfo:   *v,
 	}, nil
 }
 
