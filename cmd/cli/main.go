@@ -13,6 +13,7 @@ import (
 	"timer/internal/progress"
 	"timer/internal/render"
 	"timer/internal/ticker"
+	"timer/internal/version"
 )
 
 const (
@@ -27,6 +28,11 @@ func main() {
 	a, err := args.Parse()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if a.ShowBuildInfo {
+		version.PrintInfo()
+		return
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

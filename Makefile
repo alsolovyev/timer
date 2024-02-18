@@ -8,14 +8,19 @@ BUILD_PATH := ./bin
 BINARY_NAME := timer
 PACKAGE_PATH := ./cmd/cli
 
-
 # =====================
 #      DEVELOPMENT
 # =====================
 ## build: build cli app
 .PHONY: build
 build:
-	go build -o=${BUILD_PATH}/${BINARY_NAME} ${PACKAGE_PATH}/main.go
+	go build \
+    -ldflags " \
+      -X timer/internal/version.AppVersion=$(shell git tag | tail -n 1 | sed 's/^v//') \
+      -X \"timer/internal/version.BuildTime=$(shell date '+%d.%m.%Y %H:%M:%S')\" \
+      -X timer/internal/version.CommitHash=$(shell git rev-parse --short HEAD)" \
+    -o=${BUILD_PATH}/${BINARY_NAME} \
+    ${PACKAGE_PATH}/main.go
 
 ## run: run command line application
 .PHONY: run
