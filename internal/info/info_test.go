@@ -1,6 +1,7 @@
 package info
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -115,4 +116,28 @@ func TestInfoGetRemainTime(t *testing.T) {
 		t.Errorf("Expected '900ms', got %s", r)
 	}
 
+}
+
+func TestInfoGetEndView(t *testing.T) {
+	cases := []struct {
+		IsAborted bool
+		Expected  string
+	}{
+		{
+			IsAborted: true,
+			Expected:  "Stopped Total time elapsed: 0s",
+		},
+		{
+			IsAborted: false,
+			Expected:  fmt.Sprintf("Done %s", time.Now().Format(TIME_FORMAT)),
+		},
+	}
+
+	for _, c := range cases {
+		i := New(time.Second)
+		v := i.GetEndView(c.IsAborted)
+		if v != c.Expected {
+			t.Errorf("Expected '%s', got '%s'", c.Expected, v)
+		}
+	}
 }
