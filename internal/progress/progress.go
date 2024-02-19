@@ -22,8 +22,17 @@ type Progress struct {
 	FullSymbol string
 }
 
-func New() *Progress {
-	p := Progress{
+type ProgressOption func(*Progress)
+
+// WithEmptySymbol sets the symbol used to construct the empty components of the progress bar.
+func WithEmptySymbol(s string) ProgressOption {
+  return func(p *Progress) {
+    p.EmptySymbol = s
+  }
+}
+
+func New(opts ...ProgressOption) *Progress {
+	p := &Progress{
 		Width: GetWidth(),
 
 		EmptySymbol: "░",
@@ -33,7 +42,11 @@ func New() *Progress {
 		FullColor:  palette.Primary,
 	}
 
-	return &p
+  for _, opt := range opts {
+    opt(p)
+  }
+
+	return p
 }
 
 func (p *Progress) GetView(pr float32) string {
