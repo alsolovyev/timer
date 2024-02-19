@@ -44,6 +44,11 @@ func WithFullSymbol(s string) ProgressOption {
 	}
 }
 
+// WithGradient sets predefined gradient colors for the complete components of the progress bar.
+func WithDefaultGradient() ProgressOption {
+	return WithGradient("#5A56E0", "#EE6FF8")
+}
+
 // WithGradient sets the gradient colors for the complete components of the progress bar.
 func WithGradient(hb, he string) ProgressOption {
 	return func(p *Progress) {
