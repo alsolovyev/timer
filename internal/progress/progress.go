@@ -26,6 +26,9 @@ type Progress struct {
 	useGradient   bool
 	gradientStart colorful.Color
 	gradientEnd   colorful.Color
+
+	complete   int
+	cachedView string
 }
 
 type ProgressOption func(*Progress)
@@ -72,6 +75,8 @@ func New(opts ...ProgressOption) *Progress {
 		FullColor:  palette.Primary,
 	}
 
+  p.cachedView = p.GenerateRemainingBarView(p.Width)
+
 	for _, opt := range opts {
 		opt(p)
 	}
@@ -82,7 +87,15 @@ func New(opts ...ProgressOption) *Progress {
 func (p *Progress) GetView(pr float32) string {
 	c := int(float32(p.Width) / 100 * pr)
 
-	return p.GenerateCompleteBarView(c) + p.GenerateRemainingBarView(p.Width-c)
+	if p.complete == c {
+		return p.cachedView
+	}
+
+	b := p.GenerateCompleteBarView(c) + p.GenerateRemainingBarView(p.Width-c)
+	p.cachedView = b
+	p.complete = c
+
+	return b
 }
 
 func (p *Progress) GenerateRemainingBarView(c int) string {
