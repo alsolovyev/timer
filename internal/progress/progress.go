@@ -37,6 +37,7 @@ type ProgressOption func(*Progress)
 func WithEmptySymbol(s string) ProgressOption {
 	return func(p *Progress) {
 		p.EmptySymbol = s
+		p.cachedView = p.GenerateRemainingBarView(p.Width)
 	}
 }
 
