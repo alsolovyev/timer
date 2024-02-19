@@ -3,78 +3,57 @@ package progress
 import (
 	"strings"
 
+	"timer/internal/palette"
 	"timer/internal/terminal"
 	"timer/internal/termstyle"
-
-	"github.com/lucasb-eyer/go-colorful"
 )
 
 const (
-	DEFAULT_WIDTH = 80
+	defaultWidth = 80
 )
 
 type Progress struct {
-	WinWidth int
+	Width int
 
-	ColorA colorful.Color
-	ColorB colorful.Color
-	ColorC string
-
+	EmptyColor  string
 	EmptySymbol string
-	FullSymbol  string
 
-	p int
-	c string
+	FullColor  string
+	FullSymbol string
 }
 
-func New(e, f, ca, cb, cc string) *Progress {
-	p := Progress{}
+func New() *Progress {
+	p := Progress{
+		Width: GetWidth(),
 
-	p.WinWidth = p.GetWidth()
+		EmptySymbol: "░",
+		EmptyColor:  palette.Secondary,
 
-	p.ColorA, _ = colorful.Hex(ca)
-	p.ColorB, _ = colorful.Hex(cb)
-	p.ColorC = cc
-
-	p.EmptySymbol = e
-	p.FullSymbol = f
+		FullSymbol: "█",
+		FullColor:  palette.Primary,
+	}
 
 	return &p
 }
 
 func (p *Progress) GetView(pr float32) string {
-	n := int(float32(p.WinWidth) / 100 * pr)
+	c := int(float32(p.Width) / 100 * pr)
 
-	if n != 0 && p.p == n {
-		return p.c
-	}
-
-	p.c = p.GetBar(n, true, p.FullSymbol) + p.GetBar(p.WinWidth-n, false, p.EmptySymbol)
-	p.p = n
-
-	return p.c
-
+	return p.GenerateCompleteBarView(c) + p.GenerateRemainingBarView(p.Width-c)
 }
 
-func (p *Progress) GetBar(n int, g bool, s string) string {
-	r := strings.Builder{}
-
-	for i := 0; i < n; i++ {
-		if g {
-			cg := p.ColorA.BlendLuv(p.ColorB, float64(i)/float64(p.WinWidth-1)).Hex()
-			r.WriteString(termstyle.ToColor(s, cg))
-		} else {
-			r.WriteString(termstyle.ToColor(s, p.ColorC))
-		}
-	}
-
-	return r.String()
+func (p *Progress) GenerateRemainingBarView(c int) string {
+	return termstyle.ToColor(strings.Repeat(p.EmptySymbol, c), p.EmptyColor)
 }
 
-func (p *Progress) GetWidth() int {
+func (p *Progress) GenerateCompleteBarView(c int) string {
+	return termstyle.ToColor(strings.Repeat(p.FullSymbol, c), p.FullColor)
+}
+
+func GetWidth() int {
 	s, err := terminal.GetSize()
 	if err != nil {
-		return DEFAULT_WIDTH
+		return defaultWidth
 	}
 
 	return s.Col()

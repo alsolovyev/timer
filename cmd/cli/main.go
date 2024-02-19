@@ -16,14 +16,6 @@ import (
 	"timer/internal/version"
 )
 
-const (
-	EMPTY_SYMBOL   = "░"
-	EMPTY_COLOR    = "#454759"
-	FULL_SYMBOL    = "█"
-	GRADIENT_BEGIN = "#5A56E0"
-	GRADIENT_END   = "#EE6FF8"
-)
-
 func main() {
 	a, err := args.Parse()
 	if err != nil {
@@ -44,7 +36,7 @@ func main() {
 	r := render.New(w, c)
 	t := ticker.New(ctx, a.Duration)
 
-	p := progress.New(EMPTY_SYMBOL, FULL_SYMBOL, GRADIENT_BEGIN, GRADIENT_END, EMPTY_COLOR)
+	p := progress.New()
 	i := info.New(a.Duration,
 		info.WithName(a.Name),
 		info.WithStartTime(),
