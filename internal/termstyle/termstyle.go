@@ -1,13 +1,15 @@
 package termstyle
 
-import "github.com/muesli/termenv"
+import (
+	"github.com/muesli/termenv"
+
+	"timer/internal/palette"
+)
 
 var (
-	profile = termenv.ColorProfile()
-
-	// Palette: https://catppuccin.ryanccn.dev/palette
-	primary   = profile.Color("#cdd6f4")
-	secondary = profile.Color("#6c7086")
+	profile   = termenv.ColorProfile()
+	primary   = profile.Color(palette.Primary)
+	secondary = profile.Color(palette.Secondary)
 )
 
 func SetPrimaryColor(c string) {
