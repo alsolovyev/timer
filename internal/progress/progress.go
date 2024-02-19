@@ -3,6 +3,7 @@ package progress
 import (
 	"strings"
 
+	"timer/internal/palette"
 	"timer/internal/terminal"
 	"timer/internal/termstyle"
 
@@ -10,71 +11,127 @@ import (
 )
 
 const (
-	DEFAULT_WIDTH = 80
+	defaultWidth = 80
 )
 
 type Progress struct {
-	WinWidth int
+	Width int
 
-	ColorA colorful.Color
-	ColorB colorful.Color
-	ColorC string
-
+	EmptyColor  string
 	EmptySymbol string
-	FullSymbol  string
 
-	p int
-	c string
+	FullColor  string
+	FullSymbol string
+
+	useGradient   bool
+	gradientStart colorful.Color
+	gradientEnd   colorful.Color
+
+	complete   int
+	cachedView string
 }
 
-func New(e, f, ca, cb, cc string) *Progress {
-	p := Progress{}
+type ProgressOption func(*Progress)
 
-	p.WinWidth = p.GetWidth()
-
-	p.ColorA, _ = colorful.Hex(ca)
-	p.ColorB, _ = colorful.Hex(cb)
-	p.ColorC = cc
-
-	p.EmptySymbol = e
-	p.FullSymbol = f
-
-	return &p
+// WithEmptySymbol sets the symbol used to construct the empty components of the progress bar.
+func WithEmptySymbol(s string) ProgressOption {
+	return func(p *Progress) {
+		p.EmptySymbol = s
+	}
 }
 
+// WithFullSymbol sets the symbol used to construct the complete components of the progress bar.
+func WithFullSymbol(s string) ProgressOption {
+	return func(p *Progress) {
+		p.FullSymbol = s
+	}
+}
+
+// WithGradient sets predefined gradient colors for the complete components of the progress bar.
+func WithDefaultGradient() ProgressOption {
+	return WithGradient("#5A56E0", "#EE6FF8")
+}
+
+// WithGradient sets the gradient colors for the complete components of the progress bar.
+func WithGradient(hb, he string) ProgressOption {
+	return func(p *Progress) {
+		b, _ := colorful.Hex(hb)
+		e, _ := colorful.Hex(he)
+
+		p.useGradient = true
+		p.gradientStart = b
+		p.gradientEnd = e
+	}
+}
+
+// New creates and returns a new Progress instance with default settings.
+func New(opts ...ProgressOption) *Progress {
+	p := &Progress{
+		Width: GetWidth(),
+
+		EmptySymbol: "░",
+		EmptyColor:  palette.Secondary,
+
+		FullSymbol: "█",
+		FullColor:  palette.Primary,
+	}
+
+	p.cachedView = p.GenerateRemainingBarView(p.Width)
+
+	for _, opt := range opts {
+		opt(p)
+	}
+
+	return p
+}
+
+// GetView generates and returns a progress bar view based on the given completion percentage.
 func (p *Progress) GetView(pr float32) string {
-	n := int(float32(p.WinWidth) / 100 * pr)
+	c := int(float32(p.Width) / 100 * pr)
 
-	if n != 0 && p.p == n {
-		return p.c
+	if p.complete == c {
+		return p.cachedView
 	}
 
-	p.c = p.GetBar(n, true, p.FullSymbol) + p.GetBar(p.WinWidth-n, false, p.EmptySymbol)
-	p.p = n
+	b := p.GenerateCompleteBarView(c) + p.GenerateRemainingBarView(p.Width-c)
+	p.cachedView = b
+	p.complete = c
 
-	return p.c
-
+	return b
 }
 
-func (p *Progress) GetBar(n int, g bool, s string) string {
-	r := strings.Builder{}
+// GenerateRemainingBarView generates a progress bar view for the remaining part of the bar.
+func (p *Progress) GenerateRemainingBarView(c int) string {
+	return termstyle.ToColor(strings.Repeat(p.EmptySymbol, c), p.EmptyColor)
+}
 
-	for i := 0; i < n; i++ {
-		if g {
-			cg := p.ColorA.BlendLuv(p.ColorB, float64(i)/float64(p.WinWidth-1)).Hex()
-			r.WriteString(termstyle.ToColor(s, cg))
-		} else {
-			r.WriteString(termstyle.ToColor(s, p.ColorC))
-		}
+// GenerateCompleteBarView generates a progress bar view for the completed part of the bar.
+func (p *Progress) GenerateCompleteBarView(c int) string {
+	// Monochrome
+	if !p.useGradient {
+		return termstyle.ToColor(strings.Repeat(p.FullSymbol, c), p.FullColor)
 	}
 
-	return r.String()
+	// Gradient
+	s := strings.Builder{}
+
+	for i := 0; i < c; i++ {
+		g := p.gradientStart.BlendLuv(
+			p.gradientEnd,
+			float64(i)/float64(p.Width-1),
+		).Hex()
+
+		s.WriteString(termstyle.ToColor(p.FullSymbol, g))
+	}
+
+	return s.String()
 }
 
-func (p *Progress) GetWidth() int {
+// GetWidth retrieves the width of the terminal.
+func GetWidth() int {
 	s, err := terminal.GetSize()
 	if err != nil {
-		return DEFAULT_WIDTH
+		return defaultWidth
 	}
 
 	return s.Col()
