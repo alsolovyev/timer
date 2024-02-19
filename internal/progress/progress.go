@@ -31,6 +31,13 @@ func WithEmptySymbol(s string) ProgressOption {
   }
 }
 
+// WithFullSymbol sets the symbol used to construct the complete components of the progress bar.
+func WithFullSymbol(s string) ProgressOption {
+  return func(p *Progress) {
+    p.FullSymbol = s
+  }
+}
+
 func New(opts ...ProgressOption) *Progress {
 	p := &Progress{
 		Width: GetWidth(),
