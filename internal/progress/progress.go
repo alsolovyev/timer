@@ -10,10 +10,6 @@ import (
 	"github.com/lucasb-eyer/go-colorful"
 )
 
-const (
-	defaultWidth = 80
-)
-
 type Progress struct {
 	Width int
 
@@ -68,7 +64,7 @@ func WithGradient(hb, he string) ProgressOption {
 // New creates and returns a new Progress instance with default settings.
 func New(opts ...ProgressOption) *Progress {
 	p := &Progress{
-		Width: GetWidth(),
+		Width: terminal.GetWidth(),
 
 		EmptySymbol: "░",
 		EmptyColor:  palette.Secondary,
@@ -126,14 +122,4 @@ func (p *Progress) GenerateCompleteBarView(c int) string {
 	}
 
 	return s.String()
-}
-
-// GetWidth retrieves the width of the terminal.
-func GetWidth() int {
-	s, err := terminal.GetSize()
-	if err != nil {
-		return defaultWidth
-	}
-
-	return s.Col()
 }

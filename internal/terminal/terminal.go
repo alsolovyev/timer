@@ -5,51 +5,41 @@ import (
 	"unsafe"
 )
 
-const TIOCGWINSZ = 0x40087468
+const (
+	defaultWidth = 80
+	tiocgwinsz   = 0x40087468
+)
 
 type Terminal struct {
-	row  uint16
-	col  uint16
+	row uint16
+	col uint16
 }
 
-// Col gets terminal width
-func (w Terminal) Col() int {
-	return int(w.col)
-}
-
-// Row gets terminal height
-func (w Terminal) Row() int {
-	return int(w.row)
-}
-
-
-func GetSize() (t Terminal, err error) {
+// GetWidth retrieves the width of the terminal.
+func GetWidth() int {
+	var t Terminal
 	_, _, ec := syscall.Syscall(syscall.SYS_IOCTL,
 		uintptr(syscall.Stdout),
-		uintptr(TIOCGWINSZ),
+		uintptr(tiocgwinsz),
 		uintptr(unsafe.Pointer(&t)))
 
-  err = getError(ec)
-
-	if TIOCGWINSZ == 0 && err != nil {
-		t = Terminal{80, 25}
+	if err := getError(ec); err != nil {
+		return defaultWidth
 	}
 
-	return t, err
+	return int(t.col)
 }
 
-func getError(ec interface{}) (err error) {
+func getError(ec interface{}) error {
 	switch v := ec.(type) {
-
-	case syscall.Errno: // Some implementation return syscall.Errno number
+	case syscall.Errno:
 		if v != 0 {
-			err = syscall.Errno(v)
+			return syscall.Errno(v)
 		}
-
-	case error: // Some implementation return error
-		err = ec.(error)
+		return nil
+	case error:
+		return ec.(error)
 	default:
-		err = nil
+		return nil
 	}
-	return
 }
