@@ -33,7 +33,7 @@ type Palette struct {
 
 var (
 	Primary   = Mocha.Text
-	Secondary = Mocha.Overlay0
+	Secondary = Mocha.Surface2
 )
 
 var Mocha = Palette{
