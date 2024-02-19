@@ -1,4 +1,4 @@
-package render
+package renderer
 
 import (
 	"fmt"
@@ -23,33 +23,33 @@ type Cursor interface {
 	ClearLine()
 }
 
-type Render struct {
+type Renderer struct {
 	Cursor Cursor
 	Lines  int
 	Writer io.Writer
 }
 
-func New(w io.Writer, c Cursor) *Render {
-	return &Render{Cursor: c, Lines: 0, Writer: w}
+func New(w io.Writer, c Cursor) *Renderer {
+	return &Renderer{Cursor: c, Lines: 0, Writer: w}
 }
 
-func (r *Render) RenderLine(a ...any) {
+func (r *Renderer) RenderLine(a ...any) {
 	fmt.Fprint(r.Writer, a...)
 }
 
-func (r *Render) RenderLineln(a ...any) {
+func (r *Renderer) RenderLineln(a ...any) {
 	fmt.Fprintln(r.Writer, a...)
 	r.Lines++
 }
 
 // ClearLine clears the content of the current line by moving the cursor to the beginning.
-func (r *Render) ClearLine() {
+func (r *Renderer) ClearLine() {
 	r.Cursor.StartOfLine()
 	r.Cursor.ClearLine()
 }
 
 // DeleteLine clears the current line, moves the cursor up one line.
-func (r *Render) DeleteLine() {
+func (r *Renderer) DeleteLine() {
 	r.Cursor.Up(1)
 	r.Cursor.StartOfLine()
 	r.Cursor.ClearLine()
@@ -57,7 +57,7 @@ func (r *Render) DeleteLine() {
 }
 
 // ClearScreen clears the entire screen.
-func (r *Render) ClearScreen() {
+func (r *Renderer) ClearScreen() {
 	for r.Lines > 0 {
 		r.DeleteLine()
 	}

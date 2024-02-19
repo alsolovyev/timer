@@ -11,7 +11,7 @@ import (
 	"timer/internal/cursor"
 	"timer/internal/info"
 	"timer/internal/progress"
-	"timer/internal/render"
+	"timer/internal/renderer"
 	"timer/internal/ticker"
 	"timer/internal/version"
 )
@@ -33,7 +33,7 @@ func main() {
 
 	w := os.Stdout
 	c := cursor.New(w)
-	r := render.New(w, c)
+	r := renderer.New(w, c)
 	t := ticker.New(ctx, a.Duration)
 
 	p := progress.New(
