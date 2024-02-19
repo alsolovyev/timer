@@ -6,6 +6,8 @@ import (
 	"timer/internal/palette"
 	"timer/internal/terminal"
 	"timer/internal/termstyle"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 const (
@@ -20,22 +22,38 @@ type Progress struct {
 
 	FullColor  string
 	FullSymbol string
+
+	useGradient   bool
+	gradientStart colorful.Color
+	gradientEnd   colorful.Color
 }
 
 type ProgressOption func(*Progress)
 
 // WithEmptySymbol sets the symbol used to construct the empty components of the progress bar.
 func WithEmptySymbol(s string) ProgressOption {
-  return func(p *Progress) {
-    p.EmptySymbol = s
-  }
+	return func(p *Progress) {
+		p.EmptySymbol = s
+	}
 }
 
 // WithFullSymbol sets the symbol used to construct the complete components of the progress bar.
 func WithFullSymbol(s string) ProgressOption {
-  return func(p *Progress) {
-    p.FullSymbol = s
-  }
+	return func(p *Progress) {
+		p.FullSymbol = s
+	}
+}
+
+// WithGradient sets the gradient colors for the complete components of the progress bar.
+func WithGradient(hb, he string) ProgressOption {
+	return func(p *Progress) {
+		b, _ := colorful.Hex(hb)
+		e, _ := colorful.Hex(he)
+
+		p.useGradient = true
+		p.gradientStart = b
+		p.gradientEnd = e
+	}
 }
 
 func New(opts ...ProgressOption) *Progress {
@@ -49,9 +67,9 @@ func New(opts ...ProgressOption) *Progress {
 		FullColor:  palette.Primary,
 	}
 
-  for _, opt := range opts {
-    opt(p)
-  }
+	for _, opt := range opts {
+		opt(p)
+	}
 
 	return p
 }
@@ -67,7 +85,24 @@ func (p *Progress) GenerateRemainingBarView(c int) string {
 }
 
 func (p *Progress) GenerateCompleteBarView(c int) string {
-	return termstyle.ToColor(strings.Repeat(p.FullSymbol, c), p.FullColor)
+	// Monochrome
+	if !p.useGradient {
+		return termstyle.ToColor(strings.Repeat(p.FullSymbol, c), p.FullColor)
+	}
+
+	// Gradient
+	s := strings.Builder{}
+
+	for i := 0; i < c; i++ {
+		g := p.gradientStart.BlendLuv(
+			p.gradientEnd,
+			float64(i)/float64(p.Width-1),
+		).Hex()
+
+		s.WriteString(termstyle.ToColor(p.FullSymbol, g))
+	}
+
+	return s.String()
 }
 
 func GetWidth() int {

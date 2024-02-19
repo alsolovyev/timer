@@ -36,7 +36,9 @@ func main() {
 	r := render.New(w, c)
 	t := ticker.New(ctx, a.Duration)
 
-	p := progress.New()
+	p := progress.New(
+		progress.WithGradient("#5A56E0", "#EE6FF8"),
+	)
 	i := info.New(a.Duration,
 		info.WithName(a.Name),
 		info.WithStartTime(),
