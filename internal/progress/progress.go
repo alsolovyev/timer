@@ -64,6 +64,7 @@ func WithGradient(hb, he string) ProgressOption {
 	}
 }
 
+// New creates and returns a new Progress instance with default settings.
 func New(opts ...ProgressOption) *Progress {
 	p := &Progress{
 		Width: GetWidth(),
@@ -75,7 +76,7 @@ func New(opts ...ProgressOption) *Progress {
 		FullColor:  palette.Primary,
 	}
 
-  p.cachedView = p.GenerateRemainingBarView(p.Width)
+	p.cachedView = p.GenerateRemainingBarView(p.Width)
 
 	for _, opt := range opts {
 		opt(p)
@@ -84,6 +85,7 @@ func New(opts ...ProgressOption) *Progress {
 	return p
 }
 
+// GetView generates and returns a progress bar view based on the given completion percentage.
 func (p *Progress) GetView(pr float32) string {
 	c := int(float32(p.Width) / 100 * pr)
 
@@ -98,10 +100,12 @@ func (p *Progress) GetView(pr float32) string {
 	return b
 }
 
+// GenerateRemainingBarView generates a progress bar view for the remaining part of the bar.
 func (p *Progress) GenerateRemainingBarView(c int) string {
 	return termstyle.ToColor(strings.Repeat(p.EmptySymbol, c), p.EmptyColor)
 }
 
+// GenerateCompleteBarView generates a progress bar view for the completed part of the bar.
 func (p *Progress) GenerateCompleteBarView(c int) string {
 	// Monochrome
 	if !p.useGradient {
@@ -123,6 +127,7 @@ func (p *Progress) GenerateCompleteBarView(c int) string {
 	return s.String()
 }
 
+// GetWidth retrieves the width of the terminal.
 func GetWidth() int {
 	s, err := terminal.GetSize()
 	if err != nil {
